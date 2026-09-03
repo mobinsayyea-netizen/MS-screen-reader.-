@@ -1,5 +1,6 @@
 package com.ms.screenreader.accessibility
 
+import android.accessibilityservice.AccessibilityButtonController
 import android.accessibilityservice.AccessibilityGestureEvent
 import android.accessibilityservice.AccessibilityService
 import android.content.Intent
@@ -200,6 +201,18 @@ class MSScreenReaderService : AccessibilityService() {
         callHandling = CallHandlingManager(this, settings, tts)
         callHandling.register()
         instance = this
+
+        // The Accessibility Button isn't exposed as a plain override on
+        // AccessibilityService - it has to be picked up via
+        // AccessibilityButtonController, and only after the service is
+        // connected (registering earlier has no effect).
+        accessibilityButtonController.registerAccessibilityButtonCallback(
+            object : AccessibilityButtonController.AccessibilityButtonCallback() {
+                override fun onClicked(controller: AccessibilityButtonController) {
+                    onAccessibilityButtonClicked()
+                }
+            }
+        )
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
@@ -378,7 +391,7 @@ class MSScreenReaderService : AccessibilityService() {
      * volume-key "Accessibility Shortcut" is already used for
      * something else, or where the person prefers a tap over a swipe.
      */
-    override fun onAccessibilityButtonClicked() {
+    private fun onAccessibilityButtonClicked() {
         if (::settings.isInitialized && !settings.accessibilityShortcutEnabled) return
         performAction(GestureAction.TOGGLE_SPEECH)
     }
