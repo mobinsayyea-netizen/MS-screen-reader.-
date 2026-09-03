@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+ android:layout_width="match_parent" android:layout_height="match_parent"
+ android:orientation="vertical" android:padding="24dp">
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:text="MS Screen Reader" android:textSize="28sp" android:textStyle="bold"/>
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="12dp" android:text="Mobile Speak Screen Reader • v1.23"/>
+
+ <androidx.appcompat.widget.SwitchCompat android:id="@+id/serviceEnabledSwitch"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/service_enabled_switch_label"/>
+
+ <TextView android:id="@+id/serviceEnabledStatusText"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="4dp"
+  android:text="@string/service_status_unknown"/>
+
+ <Button android:id="@+id/chooseSoundFolderButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/choose_sound_folder"/>
+
+ <TextView android:id="@+id/soundFolderStatusText"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/no_sound_folder_selected"/>
+
+ <Button android:id="@+id/notificationAccessButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/enable_notification_access"/>
+
+ <TextView android:id="@+id/notificationAccessStatusText"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/notification_access_status_unknown"/>
+
+ <Button android:id="@+id/grantCallPermissionsButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/grant_call_permissions"/>
+
+ <TextView android:id="@+id/callPermissionsStatusText"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/call_permissions_not_granted"/>
+
+ <Button android:id="@+id/openAccessibilitySettingsButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/open_accessibility_settings"/>
+
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/accessibility_shortcut_hint"/>
+
+ <Button android:id="@+id/openDetailSettingsButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/open_detail_settings"/>
+</LinearLayout>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+ android:layout_width="match_parent" android:layout_height="match_parent">
+<LinearLayout
+ android:layout_width="match_parent" android:layout_height="wrap_content"
+ android:orientation="vertical" android:padding="24dp">
+
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:text="@string/detail_settings_title" android:textSize="24sp" android:textStyle="bold"/>
+
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/section_call_handling" android:textSize="18sp" android:textStyle="bold"/>
+ <androidx.appcompat.widget.SwitchCompat android:id="@+id/callerAnnouncerCheckBox"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/caller_announcer_toggle"/>
+ <androidx.appcompat.widget.SwitchCompat android:id="@+id/volumeAnswerCheckBox"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/volume_answer_toggle"/>
+
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/section_accessibility_shortcut" android:textSize="18sp" android:textStyle="bold"/>
+ <androidx.appcompat.widget.SwitchCompat android:id="@+id/accessibilityShortcutCheckBox"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/accessibility_shortcut_toggle"/>
+
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/section_sound" android:textSize="18sp" android:textStyle="bold"/>
+ <androidx.appcompat.widget.SwitchCompat android:id="@+id/soundSchemeCheckBox"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/sound_scheme_toggle"/>
+ <androidx.appcompat.widget.SwitchCompat android:id="@+id/vibrationCheckBox"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/vibration_toggle"/>
+
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/section_notifications" android:textSize="18sp" android:textStyle="bold"/>
+ <androidx.appcompat.widget.SwitchCompat android:id="@+id/notificationReaderCheckBox"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/notification_reader_toggle"/>
+ <Button android:id="@+id/openNotificationMuteSettingsButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/open_notification_mute_settings"/>
+
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/section_gestures" android:textSize="18sp" android:textStyle="bold"/>
+ <Button android:id="@+id/openDefaultRegisterSettingsButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/open_default_register_settings"/>
+ <Button android:id="@+id/openPerAppRegisterSettingsButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/open_per_app_register_settings"/>
+ <Button android:id="@+id/resetGestureCustomizationsButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/reset_gesture_customizations"/>
+
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/section_reading_granularities" android:textSize="18sp" android:textStyle="bold"/>
+ <Button android:id="@+id/openGranularitySettingsButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/open_granularity_settings"/>
+
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/section_verbosity" android:textSize="18sp" android:textStyle="bold"/>
+ <Button android:id="@+id/openVerbositySettingsButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/open_verbosity_settings"/>
+
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/section_focus_memory" android:textSize="18sp" android:textStyle="bold"/>
+ <androidx.appcompat.widget.SwitchCompat android:id="@+id/rememberFocusCheckBox"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/remember_focus_toggle"/>
+ <androidx.appcompat.widget.SwitchCompat android:id="@+id/readRememberedFocusCheckBox"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/read_remembered_focus_toggle"/>
+
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/section_power_button" android:textSize="18sp" android:textStyle="bold"/>
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/power_button_end_call_note"/>
+
+</LinearLayout>
+</ScrollView>

@@ -1,0 +1,111 @@
+<resources>
+ <string name="app_name">MS Screen Reader</string>
+ <string name="accessibility_service_description">Mobile Speak Screen Reader accessibility service</string>
+ <string name="service_enabled_switch_label">MS Screen Reader</string>
+ <string name="service_status_unknown">Checking status…</string>
+ <string name="service_status_on">On — running as your accessibility service</string>
+ <string name="service_status_off">Off — tap to turn on in system Accessibility Settings</string>
+ <string name="choose_sound_folder">Choose sound scheme folder</string>
+ <string name="no_sound_folder_selected">No sound folder selected — earcons off</string>
+ <string name="sound_folder_selected">Sound folder set: your custom sounds will play on events</string>
+ <string name="enable_notification_access">Enable notification reading (system settings)</string>
+ <string name="notification_access_status_unknown">Tap above to grant notification access, then come back</string>
+ <string name="notification_access_enabled">Notification reading is enabled</string>
+ <string name="notification_access_disabled">Notification reading is NOT enabled yet</string>
+ <string name="grant_call_permissions">Grant call permissions (phone state + answer calls)</string>
+ <string name="call_permissions_granted">Call permissions granted</string>
+ <string name="call_permissions_not_granted">Call permissions NOT granted yet — caller announcement and volume-button answer won\'t work</string>
+ <string name="caller_announcer_toggle">Announce incoming calls and call duration</string>
+ <string name="volume_answer_toggle">Answer calls by pressing a volume button</string>
+ <string name="open_accessibility_settings">Set up volume-key shortcut / accessibility button (system settings)</string>
+ <string name="accessibility_shortcut_hint">In the screen that opens, find "MS Screen Reader" and turn on its Shortcut / Accessibility Button option — then a volume-key hold (or the on-screen button) toggles voice feedback on/off</string>
+ <string name="open_detail_settings">Detail Settings</string>
+
+ <!-- Detail Settings screen -->
+ <string name="detail_settings_title">Detail Settings</string>
+ <string name="section_call_handling">Call Handling</string>
+ <string name="section_accessibility_shortcut">Accessibility Shortcut</string>
+ <string name="accessibility_shortcut_toggle">Enable accessibility-button / shortcut action (voice suspend-resume)</string>
+ <string name="section_sound">Sound</string>
+ <string name="sound_scheme_toggle">Play earcon sounds on events</string>
+ <string name="vibration_toggle">Vibrate on focus/click/scroll/notification</string>
+ <string name="section_notifications">Notifications</string>
+ <string name="notification_reader_toggle">Read incoming notifications aloud</string>
+ <string name="section_gestures">Gestures</string>
+ <string name="open_default_register_settings">Default Register Setting</string>
+ <string name="open_per_app_register_settings">Per-App Register Setting</string>
+ <string name="reset_gesture_customizations">Reset all gesture customizations</string>
+ <string name="reset_gesture_customizations_done">All gesture customizations cleared</string>
+ <string name="section_reading_granularities">Reading Granularities</string>
+ <string name="open_granularity_settings">Choose which granularities to cycle through</string>
+
+ <string name="section_verbosity">Verbosity</string>
+ <string name="open_verbosity_settings">Choose how much extra detail is spoken</string>
+ <string name="section_focus_memory">Focus Memory</string>
+ <string name="remember_focus_toggle">Remember and restore focus when returning to an app</string>
+ <string name="read_remembered_focus_toggle">Announce the restored element aloud</string>
+ <string name="section_power_button">Power Button</string>
+ <string name="power_button_end_call_note">Ending a call with the power button is a platform limitation — Android never delivers the power key to any third-party accessibility service, so this can\'t be built. Only the OS\'s own built-in accessibility settings can do this.</string>
+
+ <!-- Default Register Setting screen -->
+ <string name="default_register_settings_title">Default Register Setting</string>
+ <string name="default_register_settings_hint">Pick a new action for any gesture register. This changes what the gesture does everywhere in the app. Choose "(default)" to remove a customization.</string>
+
+ <!-- Per-App Register Setting screen -->
+ <string name="per_app_register_settings_title">Per-App Register Setting</string>
+ <string name="per_app_package_hint">Enter the app\'s package name (e.g. com.whatsapp)</string>
+ <string name="per_app_load_button">Load app\'s gesture list</string>
+ <string name="per_app_register_settings_hint">For the app above: pick an action per register (applies only while that app is open), or check "Open this app instead" to make the gesture launch it from anywhere.</string>
+ <string name="choose_installed_app_button">Choose installed app</string>
+ <string name="choose_installed_app_title">Choose an app</string>
+ <string name="choose_installed_app_search_hint">Search by name or package</string>
+ <string name="notification_mute_title">Per-App Notification Mute</string>
+ <string name="notification_mute_hint">Check an app to stop its notifications from being read aloud. Only apps with a launcher icon appear here.</string>
+ <string name="open_notification_mute_settings">Per-App Notification Mute</string>
+ <string name="open_this_app_instead">Open this app instead (from anywhere)</string>
+
+ <!-- Reading Granularities screen -->
+ <string name="granularity_settings_title">Reading Granularities</string>
+ <string name="granularity_settings_hint">Choose which of these the swipe up-then-down / down-then-up gesture cycles through. Unchecked ones are skipped.</string>
+
+ <!-- Verbosity Settings screen -->
+ <string name="verbosity_settings_title">Verbosity</string>
+ <string name="verbosity_settings_hint">Choose how much extra detail is spoken alongside what\'s on screen.</string>
+ <string name="verbosity_speak_element_type">Speak element type</string>
+ <string name="verbosity_speak_element_type_desc">For focused items, e.g. "button", "checkbox"</string>
+ <string name="verbosity_speak_container_info">Speak container info</string>
+ <string name="verbosity_speak_container_info_desc">Announce entering/exiting lists, grids and other containers</string>
+ <string name="verbosity_speak_usage_hints">Speak usage hints</string>
+ <string name="verbosity_speak_usage_hints_desc">After describing content, suggest how to use it</string>
+ <string name="verbosity_speak_list_item_count">Always speak number of list items</string>
+ <string name="verbosity_speak_list_item_count_desc">Speak count when entering a list or grid</string>
+ <string name="verbosity_speak_window_names">Speak window names</string>
+ <string name="verbosity_speak_window_names_desc">Speak system and input windows, such as the status bar or another keyboard</string>
+ <string name="verbosity_speak_element_ids">Speak element IDs</string>
+ <string name="verbosity_speak_element_ids_desc">For unlabelled buttons, with no other text to speak</string>
+ <string name="verbosity_speak_capital_letters">Say "capital" for capital letters</string>
+ <string name="verbosity_speak_capital_letters_desc">When stepping character-by-character</string>
+ <string name="verbosity_speak_letters_with_examples">Speak letters with examples</string>
+ <string name="verbosity_speak_letters_with_examples_desc">When navigating by character, hear an example along with each letter, like \'h, hotel\'</string>
+ <string name="verbosity_speak_text_formatting">Speak text formatting</string>
+ <string name="verbosity_speak_text_formatting_desc">For changes like bold and italic</string>
+ <string name="verbosity_count_repeated_symbols">Count repeated symbols</string>
+ <string name="verbosity_count_repeated_symbols_desc">Announces the count of repeated symbols when there are 4 or more</string>
+ <string name="verbosity_speak_notifications_screen_off">Speak notifications when screen is off</string>
+ <string name="verbosity_speak_notifications_screen_off_desc">Read incoming notifications aloud even while the screen is off</string>
+ <string name="verbosity_punctuation_level">Speak punctuation and symbols</string>
+ <string name="verbosity_punctuation_none">None</string>
+ <string name="verbosity_punctuation_some">Some</string>
+ <string name="verbosity_punctuation_all">All</string>
+
+ <!-- Main Menu (swipe up-then-right) -->
+ <string name="main_menu_title">Screen Reader Menu</string>
+ <string name="main_menu_toggle_speech">Suspend/Resume voice feedback</string>
+ <string name="main_menu_reading_granularities">Reading Granularities</string>
+ <string name="main_menu_verbosity">Verbosity</string>
+ <string name="main_menu_service_not_running">Screen reader service isn\'t running</string>
+ <string name="main_menu_disable_service">Disable screen reader completely</string>
+ <string name="main_menu_disable_service_confirm">This turns the whole service off - not just voice. It won\'t announce or respond to gestures anymore. To turn it back on, you\'ll need to go to Settings &gt; Accessibility, or use the volume-key shortcut / on-screen Accessibility Button if you\'ve set this app as their target. Continue?</string>
+ <string name="main_menu_disable_service_confirm_yes">Disable</string>
+ <string name="main_menu_cancel">Cancel</string>
+</resources>

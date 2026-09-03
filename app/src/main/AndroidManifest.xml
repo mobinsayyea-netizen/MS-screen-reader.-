@@ -1,0 +1,56 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.ANSWER_PHONE_CALLS"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+
+    <!--
+      Lets InstalledAppsPicker (settings/InstalledAppsPicker.kt) see
+      every launchable app via queryIntentActivities() on Android 11+,
+      without needing the QUERY_ALL_PACKAGES permission - see that
+      file's kdoc for why this specific approach was chosen over it.
+    -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN"/>
+            <category android:name="android.intent.category.LAUNCHER"/>
+        </intent>
+    </queries>
+
+    <application android:theme="@style/Theme.MSScreenReader" android:label="MS Screen Reader" android:allowBackup="true">
+        <activity android:name=".MainActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".settings.SettingsActivity" android:exported="false"
+            android:label="@string/detail_settings_title"/>
+        <activity android:name=".settings.DefaultGestureSettingsActivity" android:exported="false"
+            android:label="@string/default_register_settings_title"/>
+        <activity android:name=".settings.PerAppGestureSettingsActivity" android:exported="false"
+            android:label="@string/per_app_register_settings_title"/>
+        <activity android:name=".settings.NotificationMuteSettingsActivity" android:exported="false"
+            android:label="@string/notification_mute_title"/>
+        <activity android:name=".settings.GranularitySettingsActivity" android:exported="false"
+            android:label="@string/granularity_settings_title"/>
+        <activity android:name=".settings.VerbositySettingsActivity" android:exported="false"
+            android:label="@string/verbosity_settings_title"/>
+        <activity android:name=".menu.MainMenuActivity" android:exported="false"
+            android:label="@string/main_menu_title"
+            android:theme="@style/Theme.MSScreenReader.Dialog"
+            android:excludeFromRecents="true"/>
+        <service android:name=".accessibility.MSScreenReaderService"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="false">
+            <intent-filter><action android:name="android.accessibilityservice.AccessibilityService"/></intent-filter>
+            <meta-data android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_service_config"/>
+        </service>
+        <service android:name=".notifications.MSNotificationListenerService"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="false">
+            <intent-filter><action android:name="android.service.notification.NotificationListenerService"/></intent-filter>
+        </service>
+    </application>
+</manifest>

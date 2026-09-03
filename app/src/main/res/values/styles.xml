@@ -1,0 +1,7 @@
+<resources>
+ <style name="Theme.MSScreenReader" parent="Theme.Material3.DayNight.NoActionBar"/>
+ <!-- Used by MainMenuActivity - opens as a small centered dialog over
+      whatever app the person was in, instead of taking over the full
+      screen, since it's meant to be a quick in-and-out menu. -->
+ <style name="Theme.MSScreenReader.Dialog" parent="Theme.Material3.DayNight.Dialog"/>
+</resources>
