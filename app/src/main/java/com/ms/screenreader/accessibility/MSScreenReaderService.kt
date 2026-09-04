@@ -214,6 +214,7 @@ class MSScreenReaderService : AccessibilityService() {
         if (::soundScheme.isInitialized) soundScheme.release()
         if (::callHandling.isInitialized) callHandling.unregister()
         if (::screenStateAnnouncer.isInitialized) screenStateAnnouncer.unregister()
+        tts = TtsManager(this)
         soundScheme = SoundSchemeManager(this)
         gestureManager = GestureManager()
         settings = SettingsRepository(this)
