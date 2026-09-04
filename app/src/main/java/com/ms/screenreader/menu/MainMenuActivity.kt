@@ -58,6 +58,13 @@ class MainMenuActivity : AppCompatActivity() {
             text = getString(R.string.main_menu_title)
             textSize = 20f
             setTypeface(typeface, android.graphics.Typeface.BOLD)
+            // The window's own title (see AndroidManifest's android:label for
+            // this Activity) already announces "MS Screen Reader Menu" once
+            // when this screen opens. Without this, touch-explore/swipe
+            // navigation would also stop on this heading and announce the
+            // same text a second time right after - sounding like a
+            // stutter/repeat rather than a single clean announcement.
+            importantForAccessibility = android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO
         })
 
         addMenuButton(root, R.string.main_menu_toggle_speech) {

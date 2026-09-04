@@ -271,15 +271,41 @@ class MSScreenReaderService : AccessibilityService() {
      * accessibility focus back onto it now that this app's window has
      * just come to the foreground and its node list has been rebuilt.
      * Silently does nothing if the setting is off, nothing was
-     * remembered, or the remembered element isn't found this time
-     * (e.g. the screen has changed since).
+     * remembered, the remembered element isn't found this time (e.g.
+     * the screen has changed since), or [packageName] is the home
+     * screen / launcher itself (see [defaultLauncherPackage]'s kdoc).
      */
     private fun tryRestoreRememberedFocus(packageName: String) {
         if (!::settings.isInitialized || !settings.rememberFocusEnabled) return
         if (!::nodeNavigator.isInitialized) return
+        if (packageName == defaultLauncherPackage()) return
         val restored = nodeNavigator.restoreRememberedFocus(packageName) ?: return
         if (::soundScheme.isInitialized) soundScheme.play(SoundEvent.FOCUS_CHANGE)
         if (settings.readRememberedFocusOnReturn) announce(restored)
+    }
+
+    private var cachedLauncherPackage: String? = null
+
+    /**
+     * The package name of whichever app is currently set as the
+     * phone's Home app, or null if it can't be resolved. Cached after
+     * the first lookup since it only changes if the person changes
+     * their default launcher, which isn't worth re-checking on every
+     * window change.
+     *
+     * Remember-focus is meant for apps the person navigates INTO and
+     * then leaves - not the launcher itself, which is passed through
+     * every single time Back/Home/Overview is used. Without this
+     * exclusion, returning to the home screen by any route kept
+     * restoring accessibility focus to whatever icon was focused
+     * before, which felt like the reader "jumping" to an unrelated
+     * spot instead of landing fresh the way TalkBack does.
+     */
+    private fun defaultLauncherPackage(): String? {
+        cachedLauncherPackage?.let { return it }
+        val intent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+        val resolveInfo = packageManager.resolveActivity(intent, android.content.pm.PackageManager.MATCH_DEFAULT_ONLY)
+        return resolveInfo?.activityInfo?.packageName?.also { cachedLauncherPackage = it }
     }
 
     /**
@@ -379,6 +405,21 @@ class MSScreenReaderService : AccessibilityService() {
         val intent = packageManager.getLaunchIntentForPackage(packageName) ?: return
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
+    }
+
+    /**
+     * Simulates a single real finger tap at [x],[y] using the same
+     * gesture-dispatch mechanism as swipe navigation. Used as
+     * ACTIVATE's fallback when a node's own ACTION_CLICK does nothing -
+     * a real touch at the node's own on-screen position works
+     * regardless of whether the view properly exposes a click action to
+     * accessibility services.
+     */
+    private fun dispatchTapAt(x: Float, y: Float) {
+        val path = android.graphics.Path().apply { moveTo(x, y) }
+        val stroke = android.accessibilityservice.GestureDescription.StrokeDescription(path, 0, 50)
+        val gesture = android.accessibilityservice.GestureDescription.Builder().addStroke(stroke).build()
+        dispatchGesture(gesture, null, null)
     }
 
     /**
@@ -533,7 +574,23 @@ class MSScreenReaderService : AccessibilityService() {
             }
             GestureAction.ACTIVATE -> {
                 val activated = nodeNavigator.activateCurrent()
-                if (activated) soundScheme.play(SoundEvent.CLICK)
+                if (activated) {
+                    soundScheme.play(SoundEvent.CLICK)
+                } else {
+                    // ACTION_CLICK silently did nothing - some views (notably
+                    // Microsoft Launcher's own "Apps" button) don't honor it
+                    // even though they're clearly tappable on-screen. Fall
+                    // back to simulating an actual finger tap at the node's
+                    // own screen position, which works the same way a real
+                    // touch would regardless of what accessibility actions
+                    // the view declares support for.
+                    nodeNavigator.currentNodeBoundsInScreen()?.let { bounds ->
+                        if (!bounds.isEmpty) {
+                            dispatchTapAt(bounds.exactCenterX(), bounds.exactCenterY())
+                            soundScheme.play(SoundEvent.CLICK)
+                        }
+                    }
+                }
             }
             GestureAction.SCROLL_FORWARD -> handleGranularityStep(forward = true)
             GestureAction.SCROLL_BACKWARD -> handleGranularityStep(forward = false)
@@ -798,22 +855,38 @@ class MSScreenReaderService : AccessibilityService() {
      * Matching is by resource ID rather than text/contentDescription,
      * since those can vary between gesture-navigation and 3-button-
      * navigation modes on the same phone - the ID is stable either way.
+     *
+     * The resource ID identifies which physical slot was pressed, but
+     * not necessarily what it currently *does* - some phones let a
+     * person swap Back and Overview in system navigation settings, and
+     * the swapped button keeps its original slot-based resource ID
+     * (still ":id/back" for the physically-leftmost button, say) even
+     * though it now performs Overview. Android itself updates that
+     * button's own contentDescription/text to reflect its real,
+     * possibly-remapped function, so that live label is preferred here
+     * over our fixed per-ID guess - the fixed guess is only a fallback
+     * for when the system doesn't supply one.
      */
     private fun navigationBarButtonLabel(event: AccessibilityEvent): String? {
         if (event.packageName?.toString() != "com.android.systemui") return null
         val source = event.source ?: return null
-        val resourceId = try {
-            source.viewIdResourceName
+        val resourceId: String?
+        val liveLabel: String?
+        try {
+            resourceId = source.viewIdResourceName
+            liveLabel = source.contentDescription?.toString()?.takeIf { it.isNotBlank() }
+                ?: source.text?.toString()?.takeIf { it.isNotBlank() }
         } finally {
             source.recycle()
-        } ?: return null
-        return when {
-            resourceId.endsWith(":id/back") -> "Back"
-            resourceId.endsWith(":id/home") -> "Home"
-            resourceId.endsWith(":id/home_handle") -> "Home"
-            resourceId.endsWith(":id/recent_apps") -> "Recent apps"
-            else -> null
         }
+        val fallback = when {
+            resourceId?.endsWith(":id/back") == true -> "Back"
+            resourceId?.endsWith(":id/home") == true -> "Home"
+            resourceId?.endsWith(":id/home_handle") == true -> "Home"
+            resourceId?.endsWith(":id/recent_apps") == true -> "Recent apps"
+            else -> null
+        } ?: return null
+        return liveLabel ?: fallback
     }
 
     private fun extractDescription(event: AccessibilityEvent): String? {

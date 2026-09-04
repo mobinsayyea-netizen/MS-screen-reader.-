@@ -106,6 +106,21 @@ class NodeNavigator(private val service: AccessibilityService, private val setti
         return node.performAction(AccessibilityNodeInfo.ACTION_CLICK)
     }
 
+    /**
+     * Screen bounds of whichever node is currently focused, or null if
+     * there isn't one. Used as a fallback tap target when a node's own
+     * ACTION_CLICK doesn't actually do anything - some views (e.g. the
+     * "Apps"/all-apps button in Microsoft Launcher) don't expose a
+     * working click action to accessibility services even though
+     * they're clearly tappable on-screen.
+     */
+    fun currentNodeBoundsInScreen(): android.graphics.Rect? {
+        val node = flatNodes.getOrNull(currentIndex) ?: return null
+        val rect = android.graphics.Rect()
+        node.getBoundsInScreen(rect)
+        return rect
+    }
+
     /** The plain text of whichever node currently has accessibility focus (no type/hint/container decoration), or null if there isn't one / it has none. Used for character/word/line stepping and clipboard copy, which need stable raw text rather than the richer spoken announcement. */
     fun currentText(): String? {
         val node = flatNodes.getOrNull(currentIndex) ?: return null

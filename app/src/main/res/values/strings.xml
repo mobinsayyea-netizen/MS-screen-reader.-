@@ -124,7 +124,7 @@
  <string name="verbosity_punctuation_all">All</string>
 
  <!-- Main Menu (swipe up-then-right) -->
- <string name="main_menu_title">Screen Reader Menu</string>
+ <string name="main_menu_title">MS Screen Reader Menu</string>
  <string name="main_menu_toggle_speech">Suspend/Resume voice feedback</string>
  <string name="main_menu_reading_granularities">Reading Granularities</string>
  <string name="main_menu_verbosity">Verbosity</string>
