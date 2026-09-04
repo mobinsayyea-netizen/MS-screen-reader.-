@@ -2,11 +2,16 @@ package com.ms.screenreader.settings
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import com.ms.screenreader.R
+import com.ms.screenreader.gestures.GestureAction
 
 /**
  * "Detail Settings" screen (opened from MainActivity's Detail Settings
@@ -90,11 +95,50 @@ class SettingsActivity : AppCompatActivity() {
         bindToggle(R.id.readRememberedFocusCheckBox, settings.readRememberedFocusOnReturn) {
             settings.readRememberedFocusOnReturn = it
         }
+        bindToggle(R.id.wrapNavigationCheckBox, settings.wrapNavigationEnabled) {
+            settings.wrapNavigationEnabled = it
+        }
+        bindToggle(R.id.announceScreenStateCheckBox, settings.announceScreenStateEnabled) {
+            settings.announceScreenStateEnabled = it
+        }
+        bindToggle(R.id.volumeShortcutsEnabledCheckBox, settings.volumeShortcutsEnabled) {
+            settings.volumeShortcutsEnabled = it
+        }
+        bindActionSpinner(R.id.volumeSimultaneousActionSpinner, settings.volumeSimultaneousAction) {
+            settings.volumeSimultaneousAction = it
+        }
+        bindActionSpinner(R.id.volumeUpLongPressActionSpinner, settings.volumeUpLongPressAction) {
+            settings.volumeUpLongPressAction = it
+        }
+        bindActionSpinner(R.id.volumeDownLongPressActionSpinner, settings.volumeDownLongPressAction) {
+            settings.volumeDownLongPressAction = it
+        }
     }
 
     private fun bindToggle(id: Int, initial: Boolean, onChanged: (Boolean) -> Unit) {
         val switch = findViewById<SwitchCompat>(id)
         switch.isChecked = initial
         switch.setOnCheckedChangeListener { _, checked -> onChanged(checked) }
+    }
+
+    /** Fills a Spinner with every GestureAction, preselects [initial], and reports each later choice via [onChanged] - used for the three volume-key shortcut pickers. */
+    private fun bindActionSpinner(id: Int, initial: GestureAction, onChanged: (GestureAction) -> Unit) {
+        val spinner = findViewById<Spinner>(id)
+        val options = GestureAction.entries.map { it.name }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, options)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = adapter
+        spinner.setSelection(options.indexOf(initial.name).coerceAtLeast(0), false)
+
+        // Set the listener after setSelection above so restoring the
+        // saved choice doesn't immediately re-trigger a write.
+        spinner.post {
+            spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                    onChanged(GestureAction.valueOf(options[position]))
+                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+        }
     }
 }

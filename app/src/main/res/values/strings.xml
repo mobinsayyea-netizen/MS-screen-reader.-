@@ -44,6 +44,31 @@
  <string name="section_focus_memory">Focus Memory</string>
  <string name="remember_focus_toggle">Remember and restore focus when returning to an app</string>
  <string name="read_remembered_focus_toggle">Announce the restored element aloud</string>
+ <string name="wrap_navigation_toggle">Wrap navigation (loop to start/end instead of stopping)</string>
+ <string name="announce_screen_state_toggle">Announce screen locked, and time/date/battery on unlock</string>
+ <string name="section_volume_shortcuts">Volume key shortcuts</string>
+ <string name="volume_shortcuts_enabled_toggle">Enable simultaneous-press and long-press volume shortcuts</string>
+ <string name="volume_shortcut_simultaneous_label">Press both volume keys together</string>
+ <string name="volume_shortcut_up_long_press_label">Long-press volume up</string>
+ <string name="volume_shortcut_down_long_press_label">Long-press volume down</string>
+
+ <string name="permissions_screen_title">Permissions needed</string>
+ <string name="permissions_screen_intro">MS Screen Reader needs the items below to work fully. Tap "Grant all now" to go through them one after another - for the two that Android requires opening a settings screen for, just turn the switch on and come back.</string>
+ <string name="grant_all_button">Grant all now</string>
+ <string name="grant_button">Grant</string>
+ <string name="open_button">Open</string>
+ <string name="permission_row_phone_contacts_title">Phone state, answer calls, contacts</string>
+ <string name="permission_row_phone_contacts_desc">Needed for caller announcement (with the caller\'s saved name) and answering a call with the volume button.</string>
+ <string name="permission_row_notification_title">Notification reading access</string>
+ <string name="permission_row_notification_desc">Needed to read notifications aloud from the notification bar.</string>
+ <string name="permission_row_accessibility_title">Accessibility Service</string>
+ <string name="permission_row_accessibility_desc">The main switch that turns MS Screen Reader itself on.</string>
+ <string name="permission_status_granted">Granted</string>
+ <string name="permission_status_not_granted">Not granted yet</string>
+ <string name="permission_status_on">On</string>
+ <string name="permission_status_off">Off</string>
+ <string name="permissions_all_done">Everything is granted - you\'re all set.</string>
+ <string name="open_permissions_screen">Permissions</string>
  <string name="section_power_button">Power Button</string>
  <string name="power_button_end_call_note">Ending a call with the power button is a platform limitation — Android never delivers the power key to any third-party accessibility service, so this can\'t be built. Only the OS\'s own built-in accessibility settings can do this.</string>
 

@@ -118,12 +118,27 @@ class MSScreenReaderService : AccessibilityService() {
         fun getRunningInstance(): MSScreenReaderService? = instance
     }
 
+    /**
+     * Called from MainActivity right after the person grants
+     * READ_PHONE_STATE/ANSWER_PHONE_CALLS. CallHandlingManager.register()
+     * is normally only called once, in onServiceConnected() - if that
+     * ran before the permissions existed yet, the phone-state listener
+     * silently never attached (SecurityException swallowed) and stayed
+     * that way forever, even after the person granted the permission
+     * later. This lets MainActivity retry it once permissions are
+     * actually in place, without needing the service to restart.
+     */
+    fun retryCallHandlingRegistration() {
+        if (::callHandling.isInitialized) callHandling.register()
+    }
+
     private lateinit var tts: TtsManager
     private lateinit var soundScheme: SoundSchemeManager
     private lateinit var gestureManager: GestureManager
     private lateinit var nodeNavigator: NodeNavigator
     private lateinit var settings: SettingsRepository
     private lateinit var callHandling: CallHandlingManager
+    private lateinit var screenStateAnnouncer: ScreenStateAnnouncer
 
     private var lastSpoken: String? = null
     private var lastEventTimeMs: Long = 0L
@@ -165,12 +180,18 @@ class MSScreenReaderService : AccessibilityService() {
     /** Package name of the app currently in the foreground, or null if not known yet. */
     fun getCurrentForegroundPackage(): String? = currentForegroundPackage
 
+    // TYPE_VIEW_SELECTED deliberately excluded: launchers/grids fire it
+    // for every icon as the grid populates or settles after a scroll,
+    // with no actual user touch involved - that caused every home
+    // screen icon to be auto-spoken one after another. Real user
+    // navigation (swipe, touch-explore) always also produces
+    // TYPE_VIEW_FOCUSED/TYPE_VIEW_HOVER_ENTER, so nothing is lost by
+    // dropping TYPE_VIEW_SELECTED from here.
     private val handledEventTypes = setOf(
         AccessibilityEvent.TYPE_VIEW_FOCUSED,
         AccessibilityEvent.TYPE_VIEW_HOVER_ENTER,
         AccessibilityEvent.TYPE_VIEW_CLICKED,
         AccessibilityEvent.TYPE_VIEW_LONG_CLICKED,
-        AccessibilityEvent.TYPE_VIEW_SELECTED,
         AccessibilityEvent.TYPE_VIEW_SCROLLED,
         AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED,
         AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
@@ -192,14 +213,15 @@ class MSScreenReaderService : AccessibilityService() {
         if (::tts.isInitialized) tts.shutdown()
         if (::soundScheme.isInitialized) soundScheme.release()
         if (::callHandling.isInitialized) callHandling.unregister()
-
-        tts = TtsManager(this)
+        if (::screenStateAnnouncer.isInitialized) screenStateAnnouncer.unregister()
         soundScheme = SoundSchemeManager(this)
         gestureManager = GestureManager()
         settings = SettingsRepository(this)
         nodeNavigator = NodeNavigator(this, settings)
         callHandling = CallHandlingManager(this, settings, tts)
         callHandling.register()
+        screenStateAnnouncer = ScreenStateAnnouncer(this, settings, tts)
+        screenStateAnnouncer.register()
         instance = this
 
         // The Accessibility Button isn't exposed as a plain override on
@@ -365,17 +387,78 @@ class MSScreenReaderService : AccessibilityService() {
      * user has turned that on in settings - every other key passes
      * through untouched so normal volume control still works.
      */
+    private var volumeUpDownAtMs = 0L
+    private var volumeDownDownAtMs = 0L
+    private var volumeUpLongPressFired = false
+    private var volumeDownLongPressFired = false
+    private var pendingVolumeLongPress: Runnable? = null
+    private val volumeKeyHandler = android.os.Handler(android.os.Looper.getMainLooper())
+
+    /** How close together both volume keys need to go down to count as "pressed simultaneously". */
+    private val volumeSimultaneousWindowMs = 150L
+
+    /** How long a single volume key needs to be held before it counts as a long-press instead of a normal tap. Matches the system's own long-press timeout so it feels consistent with everything else on the device. */
+    private fun longPressTimeoutMs(): Long = android.view.ViewConfiguration.getLongPressTimeout().toLong()
+
     override fun onKeyEvent(event: KeyEvent): Boolean {
-        val isVolumeKey = event.keyCode == KeyEvent.KEYCODE_VOLUME_UP ||
-            event.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
-        if (isVolumeKey &&
-            event.action == KeyEvent.ACTION_DOWN &&
+        val isVolUp = event.keyCode == KeyEvent.KEYCODE_VOLUME_UP
+        val isVolDown = event.keyCode == KeyEvent.KEYCODE_VOLUME_DOWN
+        if (!isVolUp && !isVolDown) return super.onKeyEvent(event)
+
+        // Ringing-answer takes priority over the shortcuts below - a
+        // ringing call is a more urgent context than "toggle speech".
+        if (event.action == KeyEvent.ACTION_DOWN &&
             ::settings.isInitialized && settings.volumeAnswerEnabled &&
             ::callHandling.isInitialized && callHandling.isRinging()
         ) {
             callHandling.answerCall()
             return true // consume it - don't also change ringer volume
         }
+
+        if (!::settings.isInitialized || !settings.volumeShortcutsEnabled) return super.onKeyEvent(event)
+
+        val now = android.os.SystemClock.uptimeMillis()
+
+        if (event.action == KeyEvent.ACTION_DOWN && event.repeatCount == 0) {
+            // Simultaneous check: did the other volume key already go
+            // down recently and is still being held?
+            val otherKeyRecentlyDown = if (isVolUp) {
+                volumeDownDownAtMs != 0L && now - volumeDownDownAtMs < volumeSimultaneousWindowMs
+            } else {
+                volumeUpDownAtMs != 0L && now - volumeUpDownAtMs < volumeSimultaneousWindowMs
+            }
+            if (otherKeyRecentlyDown) {
+                pendingVolumeLongPress?.let { volumeKeyHandler.removeCallbacks(it) }
+                pendingVolumeLongPress = null
+                performAction(settings.volumeSimultaneousAction)
+                return true
+            }
+
+            if (isVolUp) { volumeUpDownAtMs = now; volumeUpLongPressFired = false }
+            else { volumeDownDownAtMs = now; volumeDownLongPressFired = false }
+
+            val runnable = Runnable {
+                if (isVolUp) {
+                    volumeUpLongPressFired = true
+                    performAction(settings.volumeUpLongPressAction)
+                } else {
+                    volumeDownLongPressFired = true
+                    performAction(settings.volumeDownLongPressAction)
+                }
+            }
+            pendingVolumeLongPress = runnable
+            volumeKeyHandler.postDelayed(runnable, longPressTimeoutMs())
+            return false // don't consume yet - a short tap should still adjust volume normally
+        }
+
+        if (event.action == KeyEvent.ACTION_UP) {
+            pendingVolumeLongPress?.let { volumeKeyHandler.removeCallbacks(it) }
+            pendingVolumeLongPress = null
+            val firedLongPress = if (isVolUp) volumeUpLongPressFired else volumeDownLongPressFired
+            if (isVolUp) volumeUpDownAtMs = 0L else volumeDownDownAtMs = 0L
+            if (firedLongPress) return true // consume the release too, so it doesn't also nudge the volume
+        }
+
         return super.onKeyEvent(event)
     }
 
@@ -769,6 +852,7 @@ class MSScreenReaderService : AccessibilityService() {
         if (::tts.isInitialized) tts.shutdown()
         if (::soundScheme.isInitialized) soundScheme.release()
         if (::callHandling.isInitialized) callHandling.unregister()
+        if (::screenStateAnnouncer.isInitialized) screenStateAnnouncer.unregister()
         if (instance === this) instance = null
         super.onDestroy()
     }

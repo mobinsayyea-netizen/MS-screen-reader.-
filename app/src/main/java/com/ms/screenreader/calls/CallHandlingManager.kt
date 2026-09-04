@@ -2,6 +2,7 @@ package com.ms.screenreader.calls
 
 import android.content.Context
 import android.os.Build
+import android.provider.ContactsContract
 import android.telecom.TelecomManager
 import android.telephony.PhoneStateListener
 import android.telephony.TelephonyManager
@@ -87,11 +88,42 @@ class CallHandlingManager(
         isCurrentlyRinging = true
         if (!settings.callerAnnouncerEnabled) return
         val announcement = if (!phoneNumber.isNullOrBlank()) {
-            "Incoming call from $phoneNumber"
+            val contactName = lookupContactName(phoneNumber)
+            "Incoming call from ${contactName ?: phoneNumber}"
         } else {
             "Incoming call"
         }
         tts.speak(announcement)
+    }
+
+    /**
+     * Looks up the saved contact name for [phoneNumber], or null if
+     * READ_CONTACTS isn't granted, no match is found, or the lookup
+     * fails for any reason - callers fall back to the raw number.
+     * Uses PhoneLookup, which matches numbers the same
+     * loose way the system Phone/Contacts apps do (ignoring spacing,
+     * formatting, and leading + or 0 differences).
+     */
+    private fun lookupContactName(phoneNumber: String): String? {
+        return try {
+            val uri = android.net.Uri.withAppendedPath(
+                ContactsContract.PhoneLookup.CONTENT_FILTER_URI,
+                android.net.Uri.encode(phoneNumber)
+            )
+            context.contentResolver.query(
+                uri,
+                arrayOf(ContactsContract.PhoneLookup.DISPLAY_NAME),
+                null, null, null
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    cursor.getString(cursor.getColumnIndexOrThrow(ContactsContract.PhoneLookup.DISPLAY_NAME))
+                } else null
+            }
+        } catch (_: SecurityException) {
+            null // READ_CONTACTS not granted
+        } catch (_: Exception) {
+            null
+        }
     }
 
     private fun onAnswered() {

@@ -232,8 +232,15 @@ class NodeNavigator(private val service: AccessibilityService, private val setti
         if (flatNodes.isEmpty()) refresh()
         if (flatNodes.isEmpty()) return null
 
-        val nextIndex = currentIndex + step
-        if (nextIndex !in flatNodes.indices) return null
+        var nextIndex = currentIndex + step
+        if (nextIndex !in flatNodes.indices) {
+            if (!settings.wrapNavigationEnabled) return null
+            // Wrap: past the end goes to the first element, past the
+            // start goes to the last - matches Jieshuo's "Wrap
+            // navigation" behavior instead of just stopping dead at
+            // the edge, which felt like navigation had "gotten stuck".
+            nextIndex = ((nextIndex % flatNodes.size) + flatNodes.size) % flatNodes.size
+        }
 
         currentIndex = nextIndex
         resetSubNodeCursors()
@@ -390,21 +397,51 @@ class NodeNavigator(private val service: AccessibilityService, private val setti
         return announcement
     }
 
-    /** "list"/"grid" if the node's immediate parent looks like one, else null. */
+    /**
+     * "list"/"grid" if any ancestor up the chain looks like one, else
+     * null. Deliberately walks the whole ancestor chain rather than
+     * just the immediate parent - a real list/grid row is usually
+     * several layout levels deep (row container > inner layout > title
+     * TextView, summary TextView, etc.), and each of those pieces
+     * becomes its own stop in flatNodes since they each carry their own
+     * text. Checking only the immediate parent made the container label
+     * flip between "list" and null as navigation moved between pieces
+     * of the very same row, which caused "In list" / "Out of list" to
+     * be re-announced repeatedly mid-row instead of once per real
+     * list/grid entry or exit. Capped at a handful of levels so a
+     * pathological layout can't turn every lookup into a long walk.
+     */
     private fun containerLabelFor(node: AccessibilityNodeInfo): String? {
-        val parent = node.parent ?: return null
-        val parentClass = parent.className?.toString() ?: return null
-        return when {
-            parentClass.contains("GridView") -> "grid"
-            parentClass.contains("ListView") || parentClass.contains("RecyclerView") -> "list"
-            else -> null
+        var current = node.parent
+        var depth = 0
+        while (current != null && depth < 8) {
+            val parentClass = current.className?.toString()
+            when {
+                parentClass?.contains("GridView") == true -> return "grid"
+                parentClass?.contains("ListView") == true || parentClass?.contains("RecyclerView") == true -> return "list"
+            }
+            current = current.parent
+            depth++
         }
+        return null
     }
 
-    /** Rough item count for the container announcement: all of the parent's children, not just the ones that made it into flatNodes (dividers etc. may be slightly over-counted - close enough for a spoken count). */
+    /** Rough item count for the container announcement: walks up to the same list/grid ancestor [containerLabelFor] found, and counts ITS children - not just the immediate parent's, which for a node several levels inside one row would only return that row's own internal piece count (dividers etc. may still be slightly over-counted - close enough for a spoken count). */
     private fun siblingCountFor(node: AccessibilityNodeInfo): Int {
-        val parent = node.parent ?: return 0
-        return parent.childCount
+        var current = node.parent
+        var depth = 0
+        while (current != null && depth < 8) {
+            val parentClass = current.className?.toString()
+            if (parentClass?.contains("GridView") == true ||
+                parentClass?.contains("ListView") == true ||
+                parentClass?.contains("RecyclerView") == true
+            ) {
+                return current.childCount
+            }
+            current = current.parent
+            depth++
+        }
+        return node.parent?.childCount ?: 0
     }
 
     /** What to speak for a single stepped-through character: a spelled-out punctuation word (per [SettingsRepository.punctuationLevel]) if it's punctuation, "capital X" for an uppercase letter if that setting is on, plus a short example word for letters if that setting is on (e.g. "capital h, hotel"), else the character itself. */

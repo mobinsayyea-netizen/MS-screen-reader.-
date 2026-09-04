@@ -9,6 +9,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.documentfile.provider.DocumentFile
+import com.ms.screenreader.R
 import com.ms.screenreader.settings.SettingsRepository
 
 /**
@@ -75,28 +76,55 @@ class SoundSchemeManager(private val context: Context) {
     fun hasFolderConfigured(): Boolean = !settings.soundSchemeFolderUri.isNullOrBlank()
 
     /**
+     * Bundled defaults (added so the app has a working sound scheme
+     * right after install, instead of staying silent until the person
+     * picks their own folder every single time they reinstall). Not
+     * every SoundEvent has one - only the events a matching source
+     * sound was actually available for; the rest stay silent unless
+     * the person configures their own folder for them.
+     */
+    private val bundledDefaults: Map<SoundEvent, Int> = mapOf(
+        SoundEvent.CLICK to R.raw.click,
+        SoundEvent.LONG_PRESS to R.raw.long_press,
+        SoundEvent.SCROLL_UP to R.raw.scroll_up,
+        SoundEvent.SCROLL_DOWN to R.raw.scroll_down,
+        SoundEvent.WINDOW_CHANGE to R.raw.window_change,
+        SoundEvent.FOCUS_CHANGE to R.raw.focus_change,
+        SoundEvent.NOTIFICATION to R.raw.notification,
+        SoundEvent.SPEECH_SUSPENDED to R.raw.speech_suspended,
+        SoundEvent.SPEECH_RESUMED to R.raw.speech_resumed
+    )
+
+    /**
      * Plays the earcon assigned to [event] (if configured) and vibrates
      * (if enabled) - the two are independent: vibration doesn't require
      * a sound-scheme folder to be set up, and sound doesn't require
      * vibration to be on.
+     *
+     * Sound resolution order: the person's own folder (if they've set
+     * one and it has a matching file for this event) takes priority
+     * over the bundled default, so picking a custom folder always
+     * overrides the built-in sound rather than fighting with it.
      */
     fun play(event: SoundEvent) {
         vibrateFor(event)
 
         if (!settings.soundSchemeEnabled) return
-        val folderUriString = settings.soundSchemeFolderUri ?: return
 
-        // Folder changed since last lookup - clear cache.
-        if (folderUriString != cachedFolderUri) {
-            resolvedUriCache.clear()
-            cachedFolderUri = folderUriString
+        val folderUriString = settings.soundSchemeFolderUri
+        if (folderUriString != null) {
+            if (folderUriString != cachedFolderUri) {
+                resolvedUriCache.clear()
+                cachedFolderUri = folderUriString
+            }
+            val uri = resolvedUriCache.getOrPut(event) { resolveFileUri(folderUriString, event) }
+            if (uri != null) {
+                playUri(uri)
+                return
+            }
         }
 
-        val uri = resolvedUriCache.getOrPut(event) {
-            resolveFileUri(folderUriString, event)
-        } ?: return
-
-        playUri(uri)
+        bundledDefaults[event]?.let { playRawResource(it) }
     }
 
     private fun vibrateFor(event: SoundEvent) {
@@ -136,6 +164,38 @@ class SoundSchemeManager(private val context: Context) {
             null
         } catch (e: Exception) {
             null
+        }
+    }
+
+    /** Same playback path as [playUri], but for a bundled res/raw sound instead of a user-picked file. */
+    private fun playRawResource(resId: Int) {
+        activePlayer?.let {
+            try { it.stop() } catch (_: Exception) {}
+            it.release()
+        }
+        activePlayer = null
+
+        try {
+            val player = MediaPlayer.create(
+                context, resId, AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build(),
+                0
+            ) ?: return
+            player.setOnCompletionListener { mp ->
+                mp.release()
+                if (activePlayer === mp) activePlayer = null
+            }
+            player.setOnErrorListener { mp, _, _ ->
+                mp.release()
+                if (activePlayer === mp) activePlayer = null
+                true
+            }
+            player.start()
+            activePlayer = player
+        } catch (e: Exception) {
+            // Never let a broken bundled sound take down the rest of the pipeline.
         }
     }
 

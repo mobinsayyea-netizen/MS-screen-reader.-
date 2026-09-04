@@ -60,4 +60,9 @@
   android:layout_width="match_parent" android:layout_height="wrap_content"
   android:layout_marginTop="24dp"
   android:text="@string/open_detail_settings"/>
+
+ <Button android:id="@+id/openPermissionsScreenButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="12dp"
+  android:text="@string/open_permissions_screen"/>
 </LinearLayout>

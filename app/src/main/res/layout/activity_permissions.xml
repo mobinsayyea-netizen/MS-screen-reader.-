@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+ android:layout_width="match_parent" android:layout_height="match_parent">
+<LinearLayout
+ android:layout_width="match_parent" android:layout_height="wrap_content"
+ android:orientation="vertical" android:padding="24dp">
+
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:text="@string/permissions_screen_title" android:textSize="24sp" android:textStyle="bold"/>
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="8dp"
+  android:text="@string/permissions_screen_intro"/>
+
+ <Button android:id="@+id/grantAllButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="20dp"
+  android:text="@string/grant_all_button"/>
+
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="28dp"
+  android:text="@string/permission_row_phone_contacts_title" android:textSize="18sp" android:textStyle="bold"/>
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="4dp"
+  android:text="@string/permission_row_phone_contacts_desc"/>
+ <TextView android:id="@+id/phoneContactsStatusText"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="6dp"/>
+ <Button android:id="@+id/phoneContactsButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="6dp"
+  android:text="@string/grant_button"/>
+
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/permission_row_notification_title" android:textSize="18sp" android:textStyle="bold"/>
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="4dp"
+  android:text="@string/permission_row_notification_desc"/>
+ <TextView android:id="@+id/notificationStatusText"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="6dp"/>
+ <Button android:id="@+id/notificationButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="6dp"
+  android:text="@string/open_button"/>
+
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="24dp"
+  android:text="@string/permission_row_accessibility_title" android:textSize="18sp" android:textStyle="bold"/>
+ <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="4dp"
+  android:text="@string/permission_row_accessibility_desc"/>
+ <TextView android:id="@+id/accessibilityStatusText"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="6dp"/>
+ <Button android:id="@+id/accessibilityButton"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="6dp"
+  android:text="@string/open_button"/>
+
+ <TextView android:id="@+id/allDoneText"
+  android:layout_width="match_parent" android:layout_height="wrap_content"
+  android:layout_marginTop="28dp" android:textStyle="bold"
+  android:visibility="gone"/>
+
+</LinearLayout>
+</ScrollView>

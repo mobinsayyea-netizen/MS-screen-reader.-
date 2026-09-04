@@ -31,6 +31,11 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) {
         updateCallPermissionsStatus()
+        // The service's phone-state listener may have failed to attach
+        // earlier (permission didn't exist yet at onServiceConnected
+        // time) and never retried on its own - nudge it now that the
+        // permission is actually granted.
+        MSScreenReaderService.getRunningInstance()?.retryCallHandlingRegistration()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -58,7 +63,11 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.grantCallPermissionsButton).setOnClickListener {
             callPermissionsLauncher.launch(
-                arrayOf(Manifest.permission.READ_PHONE_STATE, Manifest.permission.ANSWER_PHONE_CALLS)
+                arrayOf(
+                    Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.ANSWER_PHONE_CALLS,
+                    Manifest.permission.READ_CONTACTS
+                )
             )
         }
 
@@ -68,6 +77,14 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.openDetailSettingsButton).setOnClickListener {
             startActivity(Intent(this, com.ms.screenreader.settings.SettingsActivity::class.java))
+        }
+        findViewById<Button>(R.id.openPermissionsScreenButton).setOnClickListener {
+            startActivity(Intent(this, PermissionsActivity::class.java))
+        }
+
+        if (!settings.hasShownPermissionsOnboarding) {
+            settings.hasShownPermissionsOnboarding = true
+            startActivity(Intent(this, PermissionsActivity::class.java))
         }
 
         updateStatusText()

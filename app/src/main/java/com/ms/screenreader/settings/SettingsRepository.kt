@@ -12,6 +12,29 @@ class SettingsRepository(context: Context) {
         set(v) = p.edit().putBoolean("power_end_call", v).apply()
     var volumeAnswerEnabled: Boolean get() = p.getBoolean("volume_answer", false)
         set(v) = p.edit().putBoolean("volume_answer", v).apply()
+    /** Wrap navigation: swiping past the last element loops to the first (and past the first loops to the last), instead of just stopping. Matches Jieshuo's "Wrap navigation" setting. */
+    var wrapNavigationEnabled: Boolean get() = p.getBoolean("wrap_navigation", true)
+        set(v) = p.edit().putBoolean("wrap_navigation", v).apply()
+    /** Announce "Screen locked" when the display turns off, and speak time/date/battery when unlocked. */
+    var announceScreenStateEnabled: Boolean get() = p.getBoolean("announce_screen_state", true)
+        set(v) = p.edit().putBoolean("announce_screen_state", v).apply()
+
+    /** Whether PermissionsActivity has already been auto-opened once on first launch - so it doesn't keep popping up on every app open after that (the person can still open it manually from the main screen any time). */
+    var hasShownPermissionsOnboarding: Boolean get() = p.getBoolean("shown_permissions_onboarding", false)
+        set(v) = p.edit().putBoolean("shown_permissions_onboarding", v).apply()
+
+    /** Master toggle for the three volume-key hold/simultaneous shortcuts below - separate from [volumeAnswerEnabled], which only concerns answering a ringing call. */
+    var volumeShortcutsEnabled: Boolean get() = p.getBoolean("volume_shortcuts_enabled", true)
+        set(v) = p.edit().putBoolean("volume_shortcuts_enabled", v).apply()
+    var volumeSimultaneousAction: GestureAction
+        get() = p.getString("volume_simultaneous_action", null)?.let { runCatching { GestureAction.valueOf(it) }.getOrNull() } ?: GestureAction.TOGGLE_SPEECH
+        set(v) = p.edit().putString("volume_simultaneous_action", v.name).apply()
+    var volumeUpLongPressAction: GestureAction
+        get() = p.getString("volume_up_long_press_action", null)?.let { runCatching { GestureAction.valueOf(it) }.getOrNull() } ?: GestureAction.OPEN_MAIN_MENU
+        set(v) = p.edit().putString("volume_up_long_press_action", v.name).apply()
+    var volumeDownLongPressAction: GestureAction
+        get() = p.getString("volume_down_long_press_action", null)?.let { runCatching { GestureAction.valueOf(it) }.getOrNull() } ?: GestureAction.RECENT_APPS
+        set(v) = p.edit().putString("volume_down_long_press_action", v.name).apply()
 
     /**
      * Whether pressing the on-screen Accessibility Button or the
